@@ -28,6 +28,8 @@ export default function App() {
   const [errors, setErrors] = useState(0);
   const [lastPressedKey, setLastPressedKey] = useState('');
   const [isCyrillic, setIsCyrillic] = useState(false);
+  const [isVerticalLayout, setIsVerticalLayout] = useState(false);
+  const [textAreaHeight, setTextAreaHeight] = useState(256); // Default 16rem (256px)
   const [savedTexts, setSavedTexts] = useState<SavedText[]>([]);
   const typingAreaRef = useRef<HTMLTextAreaElement>(null);
   const sourceTextRef = useRef<HTMLDivElement>(null);
@@ -201,6 +203,40 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2">
+              <Label htmlFor="layout-switch">Vertical:</Label>
+              <Switch 
+                id="layout-switch"
+                checked={isVerticalLayout}
+                onCheckedChange={setIsVerticalLayout}
+                disabled={isActive}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label htmlFor="area-height">Height:</Label>
+              <Select 
+                value={textAreaHeight.toString()} 
+                onValueChange={(val: string) => setTextAreaHeight(parseInt(val))}
+                disabled={isActive}
+              >
+                <SelectTrigger id="area-height" className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="100">100px</SelectItem>
+                  <SelectItem value="150">150px</SelectItem>
+                  <SelectItem value="200">200px</SelectItem>
+                  <SelectItem value="256">256px</SelectItem>
+                  <SelectItem value="300">300px</SelectItem>
+                  <SelectItem value="350">350px</SelectItem>
+                  <SelectItem value="400">400px</SelectItem>
+                  <SelectItem value="450">450px</SelectItem>
+                  <SelectItem value="500">500px</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <Label htmlFor="max-errors">Max Errors:</Label>
               <Select 
                 value={maxErrors.toString()} 
@@ -283,7 +319,7 @@ export default function App() {
         </Card>
 
         {/* Main Content Area */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className={isVerticalLayout ? "flex flex-col gap-6" : "grid grid-cols-2 gap-6"}>
           {/* Left: Source Text */}
           <Card className="p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
@@ -301,7 +337,8 @@ export default function App() {
             <div 
               ref={sourceTextRef}
               onScroll={handleSourceScroll}
-              className="h-64 overflow-auto rounded-md border bg-background p-3"
+              className="overflow-auto rounded-md border bg-background p-3"
+              style={{ height: `${textAreaHeight}px` }}
             >
               <textarea
                 value={sourceText}
@@ -316,7 +353,7 @@ export default function App() {
           {/* Right: Typing Area */}
           <Card className="p-6 flex flex-col">
             <h3 className="mb-4">Type Here</h3>
-            <div className="relative h-64">
+            <div className="relative" style={{ height: `${textAreaHeight}px` }}>
               {/* Display area showing correctness */}
               {isActive && (
                 <div 
